@@ -1,0 +1,4 @@
+package org.abpira.accounts.dto;
+
+public class ErrorResponseDTO {
+}

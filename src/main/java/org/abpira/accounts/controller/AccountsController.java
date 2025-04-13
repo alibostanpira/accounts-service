@@ -1,0 +1,30 @@
+package org.abpira.accounts.controller;
+
+
+import lombok.RequiredArgsConstructor;
+import org.abpira.accounts.constants.AccountsConstants;
+import org.abpira.accounts.dto.CustomerDTO;
+import org.abpira.accounts.dto.ResponseDTO;
+import org.abpira.accounts.service.AccountsService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequiredArgsConstructor
+public class AccountsController {
+
+    private final AccountsService accountsService;
+
+    @PostMapping("/create")
+    public ResponseEntity<ResponseDTO> createAccount(@RequestBody CustomerDTO customerDTO) {
+        accountsService.createAccount(customerDTO);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ResponseDTO(AccountsConstants.STATUS_201, AccountsConstants.MESSAGE_201));
+    }
+
+
+}

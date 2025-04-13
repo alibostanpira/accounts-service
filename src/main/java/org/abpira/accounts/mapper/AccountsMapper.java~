@@ -1,0 +1,11 @@
+package org.abpira.accounts.mapper;
+
+import org.abpira.accounts.dto.AccountsDTO;
+import org.abpira.accounts.entities.Accounts;
+
+public class AccountsMapper {
+
+    public static AccountsDTO mapToAccountsDTO(Accounts accounts) {
+        
+    }
+}
