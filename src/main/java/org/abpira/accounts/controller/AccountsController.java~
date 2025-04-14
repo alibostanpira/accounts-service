@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountsController {
 
     private final AccountsService accountsService;
-    
+
     @PostMapping("/create")
     public ResponseEntity<ResponseDTO> createAccount(@RequestBody CustomerDTO customerDTO) {
         accountsService.createAccount(customerDTO);

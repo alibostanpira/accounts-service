@@ -25,6 +25,4 @@ public class AccountsController {
                 .status(HttpStatus.CREATED)
                 .body(new ResponseDTO(AccountsConstants.STATUS_201, AccountsConstants.MESSAGE_201));
     }
-
-
 }
