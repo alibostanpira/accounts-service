@@ -4,6 +4,7 @@ import org.abpira.accounts.dto.CustomerDTO;
 import org.abpira.accounts.entities.Accounts;
 import org.abpira.accounts.entities.Customer;
 import org.abpira.accounts.exceptions.CustomerAlreadyExistsException;
+import org.abpira.accounts.exceptions.ResourceNotFoundException;
 import org.abpira.accounts.repository.AccountsRepository;
 import org.abpira.accounts.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ class AccountsServiceTest {
 //    }
 
     @Test
-    void canCreateAccount() {
+    void shouldCreateAccountSuccessfully() {
         // given
         CustomerDTO customerDTO = CustomerDTO.builder()
                 .name("abc")
@@ -70,7 +71,7 @@ class AccountsServiceTest {
     }
 
     @Test
-    void willThrowExceptionIfCustomerAlreadyExists() {
+    void shouldThrowCustomerAlreadyExistsException() {
         // given
         CustomerDTO customerDTO = CustomerDTO.builder()
                 .name("abc")
@@ -91,4 +92,64 @@ class AccountsServiceTest {
         verify(customerRepository, never()).save(any());
         verify(accountsRepository, never()).save(any());
     }
+
+    @Test
+    void shouldFetchAccountDetailsSuccessfully() {
+        // given
+        String mobileNumber = "123456";
+        Customer customer = Customer.builder()
+                .mobileNumber(mobileNumber)
+                .customerId(1L)
+                .build();
+        Accounts accounts = Accounts.builder()
+                .accountNumber(1L)
+                .customerId(1L)
+                .accountType("Test")
+                .build();
+        when(customerRepository.findByMobileNumber("123456")).thenReturn(Optional.of(customer));
+        when(accountsRepository.findByCustomerId(1L)).thenReturn(Optional.of(accounts));
+
+        // when
+        underTest.fetchAccountDetails(mobileNumber);
+
+        // then
+        verify(customerRepository).findByMobileNumber(mobileNumber);
+        verify(accountsRepository).findByCustomerId(customer.getCustomerId());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCustomerNotFound() {
+        // given
+        String mobileNumber = "111111";
+        when(customerRepository.findByMobileNumber(mobileNumber)).thenReturn(Optional.empty());
+
+        // then
+        assertThatThrownBy(() -> underTest.fetchAccountDetails(mobileNumber))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Customer", "mobileNumber", mobileNumber);
+
+        verify(accountsRepository, never()).findByCustomerId(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAccountNotFound() {
+        // given
+        String mobileNumber = "111111";
+        Customer customer = Customer.builder()
+                .customerId(1L)
+                .mobileNumber(mobileNumber)
+                .build();
+
+        when(customerRepository.findByMobileNumber(mobileNumber)).thenReturn(Optional.of(customer));
+        when(accountsRepository.findByCustomerId(1L)).thenReturn(Optional.empty());
+
+        // then
+        assertThatThrownBy(() -> underTest.fetchAccountDetails(mobileNumber))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Accounts", "CustomerId", "1");
+
+        verify(customerRepository).findByMobileNumber(mobileNumber);
+        verify(accountsRepository).findByCustomerId(1L);
+    }
+
 }

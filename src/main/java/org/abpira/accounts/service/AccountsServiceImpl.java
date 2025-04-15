@@ -2,10 +2,13 @@ package org.abpira.accounts.service;
 
 import lombok.RequiredArgsConstructor;
 import org.abpira.accounts.constants.AccountsConstants;
+import org.abpira.accounts.dto.AccountsDTO;
 import org.abpira.accounts.dto.CustomerDTO;
 import org.abpira.accounts.entities.Accounts;
 import org.abpira.accounts.entities.Customer;
 import org.abpira.accounts.exceptions.CustomerAlreadyExistsException;
+import org.abpira.accounts.exceptions.ResourceNotFoundException;
+import org.abpira.accounts.mapper.AccountsMapper;
 import org.abpira.accounts.mapper.CustomerMapper;
 import org.abpira.accounts.repository.AccountsRepository;
 import org.abpira.accounts.repository.CustomerRepository;
@@ -45,5 +48,20 @@ public class AccountsServiceImpl implements AccountsService {
         newAccount.setCreatedAt(LocalDateTime.now());
         newAccount.setCreatedBy("Admin");
         return newAccount;
+    }
+
+
+    @Override
+    public CustomerDTO fetchAccountDetails(String mobileNumber) {
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber).orElseThrow(
+                () -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber)
+        );
+
+        Accounts accounts = accountsRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(
+                () -> new ResourceNotFoundException("Accounts", "CustomerId", customer.getCustomerId().toString())
+        );
+        CustomerDTO customerDTO = CustomerMapper.mapToCustomerDTO(customer, new CustomerDTO());
+        customerDTO.setAccountsDTO(AccountsMapper.mapToAccountsDTO(accounts, new AccountsDTO()));
+        return customerDTO;
     }
 }

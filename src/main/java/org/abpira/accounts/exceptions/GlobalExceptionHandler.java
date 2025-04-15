@@ -22,4 +22,15 @@ public class GlobalExceptionHandler {
                 .build(),
                 HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleRNFE(ResourceNotFoundException ex, WebRequest webRequest) {
+        return new ResponseEntity<>(ErrorResponseDTO.builder()
+                .apiPath(webRequest.getDescription(false))
+                .errorCode(HttpStatus.NOT_FOUND)
+                .errorMessage(ex.getMessage())
+                .errorTime(LocalDateTime.now())
+                .build(),
+                HttpStatus.NOT_FOUND);
+    }
 }

@@ -60,7 +60,41 @@ class AccountsRepositoryTest {
 
         // then
         assertThat(accountOptional.isPresent()).isFalse();
+    }
 
+    @Test
+    void shouldFindAccountByCustomerId() {
+        // given
+        Accounts accounts = Accounts.builder()
+                .accountNumber(1L)
+                .customerId(1L)
+                .accountType("Savings")
+                .branchAddress("New York")
+                .createdAt(LocalDateTime.of(2025, 1, 1, 0, 0))
+                .createdBy("Admin")
+                .build();
+        underTest.save(accounts);
+
+        // when
+        Optional<Accounts> found = underTest.findByCustomerId(1L);
+
+        // then
+        assertThat(found)
+                .isPresent()
+                .hasValueSatisfying(a -> {
+                    assertThat(a.getCustomerId()).isEqualTo(1L);
+                    assertThat(a.getAccountType()).isEqualTo("Savings");
+                    assertThat(a.getBranchAddress()).isEqualTo("New York");
+                });
+    }
+
+    @Test
+    void shouldReturnEmptyWhenCustomerIdNotFound() {
+        // when
+        Optional<Accounts> found = underTest.findByCustomerId(999L);
+
+        // then
+        assertThat(found).isEmpty();
     }
 
 }
