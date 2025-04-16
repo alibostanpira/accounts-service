@@ -8,5 +8,7 @@ public interface AccountsService {
 
     CustomerDTO fetchAccountDetails(String mobileNumber);
 
+    boolean updateAccount(CustomerDTO customerDTO);
 
+    boolean deleteAccounts(String mobileNumber);
 }

@@ -18,6 +18,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -58,7 +60,7 @@ class AccountsControllerTest {
     }
 
     @Test
-    void shouldFetchAccountSuccessfully() throws Exception {
+    void shouldFetchAccountDetailsSuccessfully() throws Exception {
         // given
         AccountsDTO accountsDTO = AccountsDTO.builder()
                 .accountNumber(1027418131L)
@@ -84,5 +86,73 @@ class AccountsControllerTest {
                 .andExpect(jsonPath("$.accountsDTO.accountNumber").value(1027418131))
                 .andExpect(jsonPath("$.accountsDTO.accountType").value("Savings"))
                 .andExpect(jsonPath("$.accountsDTO.branchAddress").value("New York"));
+    }
+
+    @Test
+    void shouldUpdateAccountSuccessfully() throws Exception {
+        // given
+        CustomerDTO customerDTO = CustomerDTO.builder()
+                .name("abc")
+                .mobileNumber("123456")
+                .email("abc@gmail.com")
+                .build();
+        when(accountsService.updateAccount(any(CustomerDTO.class))).thenReturn(true);
+
+        // when & then
+        mockMvc.perform(put("/api/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.statusCode", is(AccountsConstants.STATUS_200)))
+                .andExpect(jsonPath("$.statusMessage", is(AccountsConstants.MESSAGE_200)));
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateFails() throws Exception {
+        // given
+        CustomerDTO customerDTO = CustomerDTO.builder()
+                .name("abc")
+                .mobileNumber("123456")
+                .email("abc@gmail.com")
+                .build();
+        when(accountsService.updateAccount(any(CustomerDTO.class))).thenReturn(false);
+
+        // when & then
+        mockMvc.perform(put("/api/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerDTO)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.statusCode", is(AccountsConstants.STATUS_500)))
+                .andExpect(jsonPath("$.statusMessage", is(AccountsConstants.MESSAGE_500)));
+    }
+
+    @Test
+    void shouldDeleteAccountSuccessfully() throws Exception {
+        // given
+        String mobileNumber = "123456";
+        when(accountsService.deleteAccounts(mobileNumber)).thenReturn(true);
+
+        // when & then
+        mockMvc.perform(delete("/api/delete").param("mobileNumber", mobileNumber))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.statusCode", is(AccountsConstants.STATUS_200)))
+                .andExpect(jsonPath("$.statusMessage", is(AccountsConstants.MESSAGE_200)));
+    }
+
+    @Test
+    void shouldReturnErrorWhenDeleteFails() throws Exception {
+        // given
+        String mobileNumber = "123456";
+        when(accountsService.deleteAccounts(mobileNumber)).thenReturn(false);
+
+        // when & then
+        mockMvc.perform(delete("/api/delete").param("mobileNumber", mobileNumber))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.statusCode", is(AccountsConstants.STATUS_500)))
+                .andExpect(jsonPath("$.statusMessage", is(AccountsConstants.MESSAGE_500)));
     }
 }

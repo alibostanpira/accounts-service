@@ -1,5 +1,6 @@
 package org.abpira.accounts.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.abpira.accounts.constants.AccountsConstants;
 import org.abpira.accounts.dto.AccountsDTO;
@@ -24,6 +25,7 @@ public class AccountsServiceImpl implements AccountsService {
     private final CustomerRepository customerRepository;
 
     @Override
+    @Transactional
     public void createAccount(CustomerDTO customerDTO) {
         Customer customer = CustomerMapper.mapToCustomer(customerDTO, new Customer());
         customerRepository.findByMobileNumber(customerDTO.getMobileNumber())
@@ -50,7 +52,6 @@ public class AccountsServiceImpl implements AccountsService {
         return newAccount;
     }
 
-
     @Override
     public CustomerDTO fetchAccountDetails(String mobileNumber) {
         Customer customer = customerRepository.findByMobileNumber(mobileNumber).orElseThrow(
@@ -63,5 +64,41 @@ public class AccountsServiceImpl implements AccountsService {
         CustomerDTO customerDTO = CustomerMapper.mapToCustomerDTO(customer, new CustomerDTO());
         customerDTO.setAccountsDTO(AccountsMapper.mapToAccountsDTO(accounts, new AccountsDTO()));
         return customerDTO;
+    }
+
+    @Override
+    @Transactional
+    public boolean updateAccount(CustomerDTO customerDTO) {
+        boolean isUpdated = false;
+        AccountsDTO accountsDTO = customerDTO.getAccountsDTO();
+        if (accountsDTO != null) {
+            Accounts accounts = accountsRepository.findById(accountsDTO.getAccountNumber()).orElseThrow(
+                    () -> new ResourceNotFoundException("Accounts",
+                            "AccountNumber",
+                            accountsDTO.getAccountNumber().toString())
+            );
+            AccountsMapper.mapToAccounts(accountsDTO, accounts);
+            accounts = accountsRepository.save(accounts);
+
+            Long customerId = accounts.getCustomerId();
+            Customer customer = customerRepository.findById(customerId).orElseThrow(
+                    () -> new ResourceNotFoundException("Customer", "CustomerID", customerId.toString())
+            );
+            CustomerMapper.mapToCustomer(customerDTO, customer);
+            customerRepository.save(customer);
+            isUpdated = true;
+
+        }
+        return isUpdated;
+    }
+
+    @Override
+    public boolean deleteAccounts(String mobileNumber) {
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber).orElseThrow(
+                () -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber)
+        );
+        accountsRepository.deleteByCustomerId(customer.getCustomerId());
+        customerRepository.deleteById(customer.getCustomerId());
+        return true;
     }
 }
