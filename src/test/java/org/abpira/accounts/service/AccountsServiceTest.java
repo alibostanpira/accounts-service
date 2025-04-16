@@ -35,20 +35,6 @@ class AccountsServiceTest {
     @InjectMocks
     private AccountsServiceImpl underTest;
 
-//    private AutoCloseable autoCloseable;
-//    private AccountsServiceImpl underTest;
-//
-//    @BeforeEach
-//    void setUp() {
-//        autoCloseable = MockitoAnnotations.openMocks(this);
-//        underTest = new AccountsServiceImpl(accountsRepository, customerRepository);
-//    }
-//
-//    @AfterEach
-//    void tearDown() throws Exception {
-//        autoCloseable.close();
-//    }
-
     @Test
     void shouldCreateAccountSuccessfully() {
         // given
@@ -209,7 +195,7 @@ class AccountsServiceTest {
 
         when(accountsRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // when & then
+        // when and then
         assertThrows(ResourceNotFoundException.class, () -> underTest.updateAccount(customerDTO));
         verify(accountsRepository).findById(999L);
         verify(accountsRepository, never()).save(any(Accounts.class));
@@ -260,7 +246,7 @@ class AccountsServiceTest {
         when(accountsRepository.save(any(Accounts.class))).thenReturn(existingAccount);
         when(customerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // when & then
+        // when and then
         assertThrows(ResourceNotFoundException.class, () -> underTest.updateAccount(customerDTO));
         verify(accountsRepository).findById(1L);
         verify(accountsRepository).save(any(Accounts.class));
@@ -274,11 +260,6 @@ class AccountsServiceTest {
         Customer customer = Customer.builder()
                 .mobileNumber("123456")
                 .customerId(1L)
-                .build();
-        Accounts accounts = Accounts.builder()
-                .accountNumber(1L)
-                .customerId(1L)
-                .accountType("Test")
                 .build();
 
         when(customerRepository.findByMobileNumber("123456")).thenReturn(Optional.of(customer));
@@ -300,7 +281,7 @@ class AccountsServiceTest {
         // given
         when(customerRepository.findByMobileNumber("123456")).thenReturn(Optional.empty());
 
-        // when & then
+        // when and then
         assertThrows(ResourceNotFoundException.class, () -> underTest.deleteAccounts("123456"));
         verify(customerRepository).findByMobileNumber("123456");
         verify(accountsRepository, never()).deleteByCustomerId(anyLong());
