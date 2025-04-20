@@ -15,8 +15,6 @@ import org.abpira.accounts.repository.AccountsRepository;
 import org.abpira.accounts.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class AccountsServiceImpl implements AccountsService {
@@ -33,8 +31,6 @@ public class AccountsServiceImpl implements AccountsService {
                     throw new CustomerAlreadyExistsException("Customer already exists with mobile number " +
                             c.getMobileNumber());
                 });
-        customer.setCreatedAt(LocalDateTime.now());
-        customer.setCreatedBy("Admin");
         Customer savedCustomer = customerRepository.save(customer);
         accountsRepository.save(createNewAccount(savedCustomer));
     }
@@ -47,8 +43,6 @@ public class AccountsServiceImpl implements AccountsService {
         newAccount.setAccountNumber(randomAccountNumber);
         newAccount.setAccountType(AccountsConstants.SAVINGS);
         newAccount.setBranchAddress(AccountsConstants.ADDRESS);
-        newAccount.setCreatedAt(LocalDateTime.now());
-        newAccount.setCreatedBy("Admin");
         return newAccount;
     }
 

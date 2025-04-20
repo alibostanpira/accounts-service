@@ -1,6 +1,8 @@
 package org.abpira.accounts.controller;
 
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.abpira.accounts.constants.AccountsConstants;
 import org.abpira.accounts.dto.CustomerDTO;
@@ -9,8 +11,10 @@ import org.abpira.accounts.service.AccountsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RestController
 @RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
@@ -19,7 +23,7 @@ public class AccountsController {
     private final AccountsService accountsService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> createAccount(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> createAccount(@Valid @RequestBody CustomerDTO customerDTO) {
         accountsService.createAccount(customerDTO);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -27,12 +31,14 @@ public class AccountsController {
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<CustomerDTO> fetchAccountDetails(@RequestParam String mobileNumber) {
+    public ResponseEntity<CustomerDTO> fetchAccountDetails(
+            @Pattern(regexp = "^$|[0-9]{10}", message = "Mobile number should be 10 digits")
+            @RequestParam String mobileNumber) {
         return ResponseEntity.status(HttpStatus.OK).body(accountsService.fetchAccountDetails(mobileNumber));
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ResponseDTO> updateAccount(@RequestBody CustomerDTO customerDTO) {
+    public ResponseEntity<ResponseDTO> updateAccount(@Valid @RequestBody CustomerDTO customerDTO) {
         boolean isUpdated = accountsService.updateAccount(customerDTO);
         if (isUpdated) {
             return ResponseEntity
@@ -46,7 +52,9 @@ public class AccountsController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseDTO> deleteAccountsDetails(@RequestParam String mobileNumber) {
+    public ResponseEntity<ResponseDTO> deleteAccountsDetails(
+            @Pattern(regexp = "^$|[0-9]{10}", message = "Mobile number should be 10 digits")
+            @RequestParam String mobileNumber) {
         boolean isDeleted = accountsService.deleteAccounts(mobileNumber);
         if (isDeleted) {
             return ResponseEntity

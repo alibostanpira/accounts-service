@@ -42,9 +42,9 @@ class AccountsControllerTest {
     void shouldCreateAccountSuccessfully() throws Exception {
         // given
         CustomerDTO customerDTO = CustomerDTO.builder()
-                .name("abc")
-                .mobileNumber("123456")
-                .email("abc@gmail.com")
+                .name("abcde")
+                .mobileNumber("1234567890")
+                .email("abcde@gmail.com")
                 .build();
 
         doNothing().when(accountsService).createAccount(any(CustomerDTO.class));
@@ -69,20 +69,20 @@ class AccountsControllerTest {
                 .build();
 
         CustomerDTO customerDTO = CustomerDTO.builder()
-                .name("abc")
-                .mobileNumber("123456")
+                .name("abcde")
+                .mobileNumber("1234567890")
                 .email("abc@gmail.com")
                 .accountsDTO(accountsDTO)
                 .build();
-        when(accountsService.fetchAccountDetails("123456")).thenReturn(customerDTO);
+        when(accountsService.fetchAccountDetails("1234567890")).thenReturn(customerDTO);
 
         // when & then
-        mockMvc.perform(get("/api/fetch").param("mobileNumber", "123456"))
+        mockMvc.perform(get("/api/fetch").param("mobileNumber", "1234567890"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("abc"))
+                .andExpect(jsonPath("$.name").value("abcde"))
                 .andExpect(jsonPath("$.email").value("abc@gmail.com"))
-                .andExpect(jsonPath("$.mobileNumber").value("123456"))
+                .andExpect(jsonPath("$.mobileNumber").value("1234567890"))
                 .andExpect(jsonPath("$.accountsDTO.accountNumber").value(1027418131))
                 .andExpect(jsonPath("$.accountsDTO.accountType").value("Savings"))
                 .andExpect(jsonPath("$.accountsDTO.branchAddress").value("New York"));
@@ -92,8 +92,8 @@ class AccountsControllerTest {
     void shouldUpdateAccountSuccessfully() throws Exception {
         // given
         CustomerDTO customerDTO = CustomerDTO.builder()
-                .name("abc")
-                .mobileNumber("123456")
+                .name("abcde")
+                .mobileNumber("1234567890")
                 .email("abc@gmail.com")
                 .build();
         when(accountsService.updateAccount(any(CustomerDTO.class))).thenReturn(true);
@@ -112,8 +112,8 @@ class AccountsControllerTest {
     void shouldReturnErrorWhenUpdateFails() throws Exception {
         // given
         CustomerDTO customerDTO = CustomerDTO.builder()
-                .name("abc")
-                .mobileNumber("123456")
+                .name("abcde")
+                .mobileNumber("1234567890")
                 .email("abc@gmail.com")
                 .build();
         when(accountsService.updateAccount(any(CustomerDTO.class))).thenReturn(false);
@@ -131,7 +131,7 @@ class AccountsControllerTest {
     @Test
     void shouldDeleteAccountSuccessfully() throws Exception {
         // given
-        String mobileNumber = "123456";
+        String mobileNumber = "1234567890";
         when(accountsService.deleteAccounts(mobileNumber)).thenReturn(true);
 
         // when & then
@@ -145,7 +145,7 @@ class AccountsControllerTest {
     @Test
     void shouldReturnErrorWhenDeleteFails() throws Exception {
         // given
-        String mobileNumber = "123456";
+        String mobileNumber = "1234567890";
         when(accountsService.deleteAccounts(mobileNumber)).thenReturn(false);
 
         // when & then
